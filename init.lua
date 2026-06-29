@@ -40,6 +40,8 @@ vim.opt.cursorline = true
 vim.opt.hlsearch = true
 -- enable line wrapping
 vim.opt.wrap = true
+-- enable concealing for obsidian.nvim syntax features
+vim.opt.conceallevel = 2
 
 -- formatting
 vim.opt.tabstop = 2
@@ -73,6 +75,8 @@ require("lspconfig")
 require("fzf")
 require("statusline")
 require("utility")
+require("obsidian-plugin")
+require("linting")
 
 -- uncomment to enable automatic plugin updates
 -- vim.pack.update()

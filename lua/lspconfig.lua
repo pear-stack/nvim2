@@ -29,7 +29,7 @@ vim.pack.add({
 require("mason").setup()
 require("mason-lspconfig").setup()
 require("mason-tool-installer").setup({
-  ensure_installed = vim.tbl_keys(lsp_servers),
+  ensure_installed = vim.tbl_extend("force", vim.tbl_keys(lsp_servers), { "oelint-adv" }),
 })
 
 -- configure each lsp server on the table
