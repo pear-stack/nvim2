@@ -28,6 +28,12 @@ require("blink.cmp").setup({
     ['<C-k>'] = { 'show_signature', 'hide_signature', 'fallback' },
   },
 
+  sources = {
+    per_filetype = {
+      bitbake = { 'lsp', 'path', 'snippets', 'buffer', 'omni' },
+    },
+  },
+
   fuzzy = {
     implementation = "lua",
   },

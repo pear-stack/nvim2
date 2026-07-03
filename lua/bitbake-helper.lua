@@ -1,6 +1,7 @@
 local M = {}
 
 local root_markers = { ".git", "build/conf/local.conf", "build/conf/bblayers.conf" }
+local class_cache = {}
 
 function M.find_root()
   local dir = vim.fn.expand("%:p:h")
@@ -128,6 +129,128 @@ function M.find_patch_file(word, recipe_dir)
   end
 end
 
+local function get_bbclasses(root)
+  if class_cache[root] then
+    return class_cache[root]
+  end
+  local layers = M.find_layers(root)
+  local seen = {}
+  local result = {}
+  for _, layer in ipairs(layers) do
+    for _, sub in ipairs({ "classes", "classes-global", "classes-recipe" }) do
+      local dir = layer .. "/" .. sub
+      if vim.fn.isdirectory(dir) == 1 then
+        local ok, files = pcall(vim.fn.readdir, dir)
+        if ok then
+          for _, f in ipairs(files) do
+            local name = f:match("^(.+)%.bbclass$")
+            if name and not seen[name] then
+              seen[name] = true
+              table.insert(result, name)
+            end
+          end
+        end
+      end
+    end
+  end
+  table.sort(result)
+  class_cache[root] = result
+  return result
+end
+
+function M.complete(findstart, base)
+  if findstart == 1 then
+    local col = vim.fn.col(".") - 1
+    local line = vim.fn.getline(".")
+    local start = col
+
+    local file_pos = line:match("()file://")
+    if file_pos then
+      local after_file = file_pos + 6
+      if col >= after_file then
+        return after_file
+      end
+    end
+
+    while start > 0 do
+      local char = line:sub(start, start)
+      if char:match("[%w_./-]") then
+        start = start - 1
+      else
+        break
+      end
+    end
+    return start
+  end
+
+  local col = vim.fn.col(".") - 1
+  local line = vim.fn.getline(".")
+  local before = line:sub(1, col)
+  local items = {}
+
+  if before:match("inherit%s+") then
+    local root = M.find_root()
+    if root then
+      for _, name in ipairs(get_bbclasses(root)) do
+        if name:lower():sub(1, #base) == base:lower() then
+          table.insert(items, { word = name, menu = "[bbclass]" })
+        end
+      end
+    end
+  end
+
+  if before:match("require%s+") or before:match("include%s+") then
+    local dir = vim.fn.expand("%:p:h")
+    local seen = {}
+    local function scan(prefix, scan_dir)
+      if vim.fn.isdirectory(scan_dir) ~= 1 then return end
+      local ok, files = pcall(vim.fn.readdir, scan_dir)
+      if not ok then return end
+      for _, f in ipairs(files) do
+        if (f:match("%.inc$") or f:match("%.bb$")) and not seen[f] then
+          seen[f] = true
+          local name = (prefix or "") .. f
+          if name:lower():sub(1, #base) == base:lower() then
+            table.insert(items, { word = name, menu = "[file]" })
+          end
+        end
+      end
+    end
+    scan(nil, dir)
+    scan("files/", dir .. "/files")
+  end
+
+  local file_url_col = line:match("()file://")
+  if file_url_col and col >= file_url_col + 6 then
+    local dir = vim.fn.expand("%:p:h")
+    local recipe_name = vim.fn.expand("%:t:r")
+    local bpn = recipe_name:gsub("_.*$", "")
+    local pv = recipe_name:match("_(.+)$")
+    local seen = {}
+    local function scan(prefix, scan_dir)
+      if vim.fn.isdirectory(scan_dir) ~= 1 then return end
+      local ok, files = pcall(vim.fn.readdir, scan_dir)
+      if not ok then return end
+      for _, f in ipairs(files) do
+        if (f:match("%.patch$") or f:match("%.diff$") or f:match("%.cfg$")) and not seen[f] then
+          seen[f] = true
+          local name = (prefix or "") .. f
+          if name:lower():sub(1, #base) == base:lower() then
+            table.insert(items, { word = name, menu = "[patch]" })
+          end
+        end
+      end
+    end
+    scan(nil, dir)
+    scan(nil, dir .. "/files")
+    if bpn and pv then
+      scan(nil, dir .. "/" .. bpn .. "-" .. pv)
+    end
+  end
+
+  return items
+end
+
 local function find_by_line_analysis(line, word, recipe_dir, layers)
   word = word or vim.fn.expand("<cword>")
   line = line or vim.fn.getline(".")
@@ -193,6 +316,7 @@ vim.api.nvim_create_autocmd("FileType", {
   group = group,
   pattern = "bitbake",
   callback = function()
+    vim.bo.omnifunc = "v:lua.require('bitbake-helper').complete"
     vim.keymap.set("n", "grd", M.go_to_definition, { buffer = true, desc = "BitBake go to definition" })
     vim.keymap.set("n", "gD", M.go_to_definition, { buffer = true, desc = "BitBake go to definition" })
   end,
