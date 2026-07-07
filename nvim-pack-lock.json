@@ -8,6 +8,14 @@
       "rev": "f29d8bac6549bc1e7d699c83f680823d7def98bd",
       "src": "https://github.com/saghen/blink.lib"
     },
+    "floatty.nvim": {
+      "rev": "e82ae3bbe46b8e28918bcf7b9f3d5c36304e0c9f",
+      "src": "https://github.com/ingur/floatty.nvim"
+    },
+    "gitsigns.nvim": {
+      "rev": "2038c666bd9d8a0b7349a0b6ee00dc83104b9ecf",
+      "src": "https://github.com/lewis6991/gitsigns.nvim"
+    },
     "kanagawa.nvim": {
       "rev": "bb85e4bfc8d89b0e62c8fa53ccdd13d12e2f77b3",
       "src": "https://github.com/rebelot/kanagawa.nvim"
@@ -52,9 +60,21 @@
       "rev": "726b60c89f4bafef267a714ea1faa1335bdd414a",
       "src": "https://github.com/epwalsh/obsidian.nvim"
     },
+    "overseer.nvim": {
+      "rev": "a93d9f6d6defdac4bcd6d2c8ba988650e42e0a0e",
+      "src": "https://github.com/stevearc/overseer.nvim"
+    },
     "plenary.nvim": {
       "rev": "74b06c6c75e4eeb3108ec01852001636d85a932b",
       "src": "https://github.com/nvim-lua/plenary.nvim"
+    },
+    "rnvimr": {
+      "rev": "8bd6e3ac0ae515c2745a2274dacf2c1cc43b607f",
+      "src": "https://github.com/kevinhwang91/rnvimr"
+    },
+    "switchboard.nvim": {
+      "rev": "b01e490409d92fee2a08791ec13a3ef46dab7f1a",
+      "src": "https://github.com/karnull/switchboard.nvim"
     },
     "telescope.nvim": {
       "rev": "7d324792b7943e4aa16ad007212e6acc6f9fe335",

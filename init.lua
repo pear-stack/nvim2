@@ -78,6 +78,9 @@ require("statusline")
 require("utility")
 require("obsidian-plugin")
 require("linting")
+require("gitsigns-plugin")
+require("rnvimr")
+require("floatty-plugin")
 
 -- uncomment to enable automatic plugin updates
 -- vim.pack.update()
